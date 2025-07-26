@@ -1,0 +1,12 @@
+services:
+  - type: cron
+    name: daily-nse-sentiment
+    schedule: "0 3 * * 1-5"  # Runs at 9:00 AM IST (3:30 UTC)
+    runtime: python
+    buildCommand: ""
+    startCommand: "python main.py"
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHAT_ID
+        sync: false
