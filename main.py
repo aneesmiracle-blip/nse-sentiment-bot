@@ -1,42 +1,33 @@
-import logging
-import sys
-
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-print(">>> Starting script...")
-
 import os
-import pandas as pd
 import requests
-from datetime import datetime, timedelta
-import telegram
+import pandas as pd
+from telegram import Bot, ParseMode
+from apscheduler.schedulers.blocking import BlockingScheduler
+from datetime import datetime
 
-try:
-    # Setup Telegram Bot
-    BOT_TOKEN = os.getenv("BOT_TOKEN")
-    CHAT_ID = os.getenv("CHAT_ID")
+# === ENV Variables ===
+BOT_TOKEN = os.getenv("BOT_TOKEN", "7481875754:AAFVurIEOgcftMw6H-xgp58lzCUPf28AR2g")
+CHAT_ID = os.getenv("CHAT_ID", "5964132878")
 
+bot = Bot(token=BOT_TOKEN)
+
+# === Core Function ===
+def send_sentiment_report():
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    message = f"*📊 NSE Sentiment Report*\n`{now}`\n\n"
+    message += "🔹 Retail: Bullish\n🔸 FII: Bearish\n🔹 PRO: Neutral\n"
+    message += "_Monitor support and resistance carefully._"
+
+    bot.send_message(chat_id=CHAT_ID, text=message, parse_mode=ParseMode.MARKDOWN)
+
+# === Scheduler ===
+scheduler = BlockingScheduler()
+scheduler.add_job(send_sentiment_report, trigger="interval", minutes=10)
+
+# === Start ===
+if __name__ == "__main__":
+    print(">>> Starting script...")
     print(f">>> BOT_TOKEN: {BOT_TOKEN}")
     print(f">>> CHAT_ID: {CHAT_ID}")
-
-    bot = telegram.Bot(token=BOT_TOKEN)
-
-    # Dummy sentiment message
-    message = """
-📊 *NSE Sentiment Report – {date}*
-
-*Retail*: 🧑‍💼 Neutral  
-*FII*: 🐻 Bearish  
-*PRO*: 🐂 Bullish
-
-🔥 *Trap Zones (OI based)*:  
-• Put OI Max: 23500 🟢 (Support)  
-• Call OI Max: 23800 🔴 (Resistance)  
-⚠️ IV Spike > 10% at 23800
-
-Stay alert! Institutions may trap near zones.
-""".format(date=datetime.now().strftime('%d-%b-%Y'))
-
-    bot.send_message(chat_id=CHAT_ID, text=message, parse_mode=telegram.constants.ParseMode.MARKDOWN)
-
-except Exception as e:
-    logging.exception("❌ An error occurred:")
+    send_sentiment_report()  # optional initial run
+    scheduler.start()
