@@ -1,4 +1,18 @@
 # main.py
+# main.py
+
+import logging
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+print(">>> Starting script...")  # helps Render log show something before error
+
+import os
+import pandas as pd
+import requests
+from datetime import datetime, timedelta
+import telegram
+
 import os
 import pandas as pd
 import requests
